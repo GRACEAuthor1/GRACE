@@ -20,26 +20,9 @@ In particular __Gowalla__, __Yelp2018__, __Amazon-Book__ are three widely used d
 
 ## The Recommendation Task
 
-### Comparison of different recommendation approaches.
-Each model is trained on the same training set and finetuned with the same validation set. The shown results are on the test set. (70% training, 10% validation, and 20% test set). The following table summarizes the results for each recommender model and data processing approach:
-
-|            model           | recall@25 | precision@25 | HR@10   | NDCG@10 |
-|:--------------------------:|:---------:|:------------:|:-------:|:-------:|
-|    matrix factorization    |    0.14   |     0.07     | 0.93    | 0.74    |
-|  Factorization Machine     |    0.337  |     0.127    | 0.967   | 0.864   |
-|  Neural Factorization Machine| 0.332   |    0.130     | 0.943   | 0.847   |
-| Neural Collaborative Filtering (NCF) | 0.33 | 0.13    | 0.97    | 0.87    |
-| TiSASRec                   |    0.226  |     0.152    | 0.954   | 0.863   |
-| Wide & Deep                |    0.319  |     0.131    | 0.959   | 0.861   |
-| Deep & Cross               |    0.333  |     0.134    | 0.964   | 0.869   |
-| GAT                        |    0.332  |     0.126    | 0.999   | 0.85    |
-|            NGCF            |    0.334  |     0.135    | 0.973   | 0.863   |
-|          LightGCN          |    0.378  |     0.165    |         |         |
-
-
 ### Train your model. 
 
-A model can be trained using the following command:
+A LightGCN can be trained using the following command:
 ```bash
 python RecSys/nn/run_train.py /path/to/config/file.yaml
 ```
@@ -59,38 +42,11 @@ In order to be consider, a dataset must have at least three files: __data/`datas
     - `t`: (optional) timestamp
 - The optional key `seed` is an int that cand be useful for reproducing results.
 
-#### 2. Choose your model
-- The key `model` allows to choose between the different implemented model:
-    - Matrix Factorization: __MatrixFactorization__
-    - User to user collaborative filtering using Pearson correlation: __User2UserCosineSimilarity__ (name is not well chosen as the Pearson correlation is used)
-    - Item to item collaborative filtering using Pearson correlation: __Item2ItemCosineSimilarity__ (idem)
-    - NCF: __NCF__
-    - NGCF: __NGCF__
-    - LightGCN: __LightGCN_simple__
-
-- For models that uses an embedding matrix to represent users and items, the key `embedding_type` allows to introduce entity resolution.
-    - __IdEmbedding__: Each user/items is mapped to a different embedding.
-    - __IdEmbeddingPlusNameEmbedding__: (only for the Tomplay dataset) The encoding of song title is added to item embeddings.
-    - __UserFeaturesPlusNameEmbedding__: (only for the Tomplay dataset) Users level and instrument are encoded and summed. The encoding of song title is added to item embeddings.
-    - __UserFeaturesAndIdEmbeddingPlusNameEmbedding__: (only for the Tomplay dataset) Users level, instrument and id are encoded and summed. The encoding of song title is added to item embeddings.
-
+#### 2. Model parameters
 - The key `embedding_dim` allows to choose the embedding dimension.
-- For model that suits this config, `num_layers` allows to choose the number of layers. 
+- `num_layers` allows to choose the number of layers. 
 
-#### 3. Graph preprocessing
-We implemented different preprocessing of the user-item interaction graph that had significant effect on the models performance.
-
-- The key `add_edges`, if used, connects items with similar features by ading a node that is connected to them.
-    - __add_nothing__: By default no connection is added.
-    - __connect_same_musics__: Add a between each group of items having the same features. The features that determine the merging are chosen using the key `merge_on` (list of strings).
-
-- The key `edge_weights` turns the user-item interaction graph into a weighted graph.
-    - __ones__: All interactions have the same weights: the weight of (u,i) is 0 if u have never interacted with i, 1 otherwise.
-    - __num_interactions__: Weight of edge (u,i) is the number of times u interacted with i.
-    - __exp_time_since_last_inter__: Weights decrease exponentially as the timestamp difference with last user interactions increases. The key `edge_weighting_gamma` controls how fast the weights decrease.
-    - __exp_time__: Weights decrease exponentially as the timestamp difference with last overall interaction increases. The key `edge_weighting_gamma` controls how fast the weights decrease.
-
-#### 4. Training parameters
+#### 3. Training parameters
 - The key `loss` can be __BPR__ as for BPR loss or __CE__ as for cross entropy loss.
 - The keys `lr`, `epochs`, `batch_size` are the standard training parameters.
 
@@ -108,7 +64,7 @@ python ttest.py /path/to/results/of/model1/ /path/to/results/of/model2/
 ```
 
 
-### Interpretability
+## Interpretability
 
 We implemented three different method for explaining GNNs:
  - SensitivityAnalysis : it measures the impact of a particular change in the input on the prediction. We used the local gradient of the model with respect to the nodes features to quantify sensitivity. 
